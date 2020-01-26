@@ -64,3 +64,11 @@ for id in range(1,11):
     image_file_name = full_link.split('/')[-1]
     download_image(url=full_link, filename=image_file_name, )
 
+    comments = soup.find_all('div', class_='texts')
+    comments = [comment.find('span', class_='black').text for comment in comments]
+
+    genres = soup.find('span', class_='d_book').find_all('a')
+    genres = [genre.text for genre in genres]
+
+    print(genres)
+
