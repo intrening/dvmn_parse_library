@@ -54,12 +54,9 @@ for page in (1,1):
     response.raise_for_status()
     if response.status_code in [301, 302]:
         break
-
     soup = BeautifulSoup(response.text, 'lxml')
-
-    book_tables = soup.find_all('table', class_='d_book')
-    book_ids += [book.find('a')['href'][2:-1] for book in book_tables]
-    
+    book_links = soup.select('.d_book .bookimage a')
+    book_ids += [book_link['href'][2:-1] for book_link in book_links]
 
 book_list = []
 
@@ -72,20 +69,19 @@ for book_id in book_ids:
     soup = BeautifulSoup(response.text, 'lxml')
     header = soup.find('h1').text
     title, author = header.split('::')
-    title = title.strip()
-    author = author.strip()
+    title, author = title.strip(), author.strip()
     file_url = f'http://tululu.org/txt.php?id={book_id}'
     book_path = download_txt(url=file_url, filename=f'{title}.txt')
 
-    image_link = soup.find('div', class_='bookimage').find('img')['src']
+    image_link = soup.select_one('.bookimage img')['src']
     image_full_link = urljoin(url, image_link)
     image_file_name = image_full_link.split('/')[-1]
     img_src = download_image(url=image_full_link, filename=image_file_name, )
 
-    comments = soup.find_all('div', class_='texts')
-    comments = [comment.find('span', class_='black').text for comment in comments]
+    comments = soup.select('div.texts span.black')
+    comments = [comment.text for comment in comments]
 
-    genres = soup.find('span', class_='d_book').find_all('a')
+    genres = soup.select('span.d_book a')
     genres = [genre.text for genre in genres]
 
     book_list.append({
