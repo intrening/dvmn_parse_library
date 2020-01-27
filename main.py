@@ -23,7 +23,7 @@ def download_txt(url, filename, folder='books/'):
     os.makedirs(folder, exist_ok=True)
     filename = sanitize_filename(filename)
     fpath = os.path.join(folder, filename)
-    with open(fpath,'w') as f:
+    with open(fpath, 'w') as f:
         f.write(response.text)
     return fpath
 
@@ -44,24 +44,23 @@ def download_image(url, filename, folder='images/'):
     os.makedirs(folder, exist_ok=True)
     filename = sanitize_filename(filename)
     fpath = os.path.join(folder, filename)
-    with open(fpath,'wb') as f:
+    with open(fpath, 'wb') as f:
         f.write(response.content)
     return fpath
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--start_page", help="Первая страница для скачивания",)
-    parser.add_argument("--end_page", help="Последняя страница для скачивания",)
+    parser.add_argument("--start_page", help="Первая страница для скачивания")
+    parser.add_argument("--end_page", help="Последняя страница для скачивания")
     args = parser.parse_args()
-    start_page = int (args.start_page or 1)
-    end_page = int(args.end_page)
+    start_page = 1 if not args.start_page else int(args.start_page)
+    end_page = None if not args.end_page else int(args.end_page)
 
     book_ids = []
     page = start_page - 1
-    print (start_page, end_page)
-    while page <= end_page or not end_page:
-        page +=1 
+    while not end_page or page <= end_page:
+        page += 1
         url = f'http://tululu.org/l55/{page}/'
         response = requests.get(url, allow_redirects=False)
         response.raise_for_status()
@@ -89,7 +88,7 @@ def main():
         image_link = soup.select_one('.bookimage img')['src']
         image_full_link = urljoin(url, image_link)
         image_file_name = image_full_link.split('/')[-1]
-        img_src = download_image(url=image_full_link, filename=image_file_name, )
+        img_src = download_image(url=image_full_link, filename=image_file_name)
 
         comments = soup.select('div.texts span.black')
         comments = [comment.text for comment in comments]
@@ -108,6 +107,7 @@ def main():
 
     with open('book_list.json', 'w') as book_file:
         json.dump(book_list, book_file, ensure_ascii=True)
+
 
 if __name__ == "__main__":
     main()
