@@ -1,3 +1,4 @@
+import argparse
 import requests
 import os
 from bs4 import BeautifulSoup
@@ -47,51 +48,66 @@ def download_image(url, filename, folder='images/'):
         f.write(response.content)
     return fpath
 
-book_ids = []
-for page in (1,1):
-    url = f'http://tululu.org/l55/{page}/'
-    response = requests.get(url, allow_redirects=False)
-    response.raise_for_status()
-    if response.status_code in [301, 302]:
-        break
-    soup = BeautifulSoup(response.text, 'lxml')
-    book_links = soup.select('.d_book .bookimage a')
-    book_ids += [book_link['href'][2:-1] for book_link in book_links]
 
-book_list = []
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--start_page", help="Первая страница для скачивания",)
+    parser.add_argument("--end_page", help="Последняя страница для скачивания",)
+    args = parser.parse_args()
+    start_page = int (args.start_page or 1)
+    end_page = int(args.end_page)
 
-for book_id in book_ids:
-    book_link = f'http://tululu.org/b{book_id}/'
-    response = requests.get(book_link, allow_redirects=False)
-    response.raise_for_status()
-    if response.status_code in [301, 302]:
-        continue
-    soup = BeautifulSoup(response.text, 'lxml')
-    header = soup.find('h1').text
-    title, author = header.split('::')
-    title, author = title.strip(), author.strip()
-    file_url = f'http://tululu.org/txt.php?id={book_id}'
-    book_path = download_txt(url=file_url, filename=f'{title}.txt')
+    book_ids = []
+    page = start_page - 1
+    print (start_page, end_page)
+    while page <= end_page or not end_page:
+        page +=1 
+        url = f'http://tululu.org/l55/{page}/'
+        response = requests.get(url, allow_redirects=False)
+        response.raise_for_status()
+        if response.status_code in [301, 302]:
+            break
+        soup = BeautifulSoup(response.text, 'lxml')
+        book_links = soup.select('.d_book .bookimage a')
+        book_ids += [book_link['href'][2:-1] for book_link in book_links]
 
-    image_link = soup.select_one('.bookimage img')['src']
-    image_full_link = urljoin(url, image_link)
-    image_file_name = image_full_link.split('/')[-1]
-    img_src = download_image(url=image_full_link, filename=image_file_name, )
+    book_list = []
 
-    comments = soup.select('div.texts span.black')
-    comments = [comment.text for comment in comments]
+    for book_id in book_ids:
+        book_link = f'http://tululu.org/b{book_id}/'
+        response = requests.get(book_link, allow_redirects=False)
+        response.raise_for_status()
+        if response.status_code in [301, 302]:
+            continue
+        soup = BeautifulSoup(response.text, 'lxml')
+        header = soup.find('h1').text
+        title, author = header.split('::')
+        title, author = title.strip(), author.strip()
+        file_url = f'http://tululu.org/txt.php?id={book_id}'
+        book_path = download_txt(url=file_url, filename=f'{title}.txt')
 
-    genres = soup.select('span.d_book a')
-    genres = [genre.text for genre in genres]
+        image_link = soup.select_one('.bookimage img')['src']
+        image_full_link = urljoin(url, image_link)
+        image_file_name = image_full_link.split('/')[-1]
+        img_src = download_image(url=image_full_link, filename=image_file_name, )
 
-    book_list.append({
-        'title': title,
-        'author': author,
-        'img_src': img_src,
-        'book_path': book_path,
-        'comments': comments,
-        'genres': genres,
-    })
+        comments = soup.select('div.texts span.black')
+        comments = [comment.text for comment in comments]
 
-with open('book_list.json', 'w') as book_file:
-    json.dump(book_list, book_file, ensure_ascii=True)
+        genres = soup.select('span.d_book a')
+        genres = [genre.text for genre in genres]
+
+        book_list.append({
+            'title': title,
+            'author': author,
+            'img_src': img_src,
+            'book_path': book_path,
+            'comments': comments,
+            'genres': genres,
+        })
+
+    with open('book_list.json', 'w') as book_file:
+        json.dump(book_list, book_file, ensure_ascii=True)
+
+if __name__ == "__main__":
+    main()
