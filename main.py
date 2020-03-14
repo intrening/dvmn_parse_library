@@ -53,11 +53,14 @@ def download_image(url, filename, folder='images'):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--start_page", help="Первая страница для скачивания")
-    parser.add_argument("--end_page", help="Последняя страница для скачивания")
+    parser.add_argument(
+        "--start_page", help="Первая страница для скачивания", default=1, type=int,
+    )
+    parser.add_argument(
+        "--end_page", help="Последняя страница для скачивания", default=None, type=int,
+    )
     args = parser.parse_args()
-    start_page = 1 if not args.start_page else int(args.start_page)
-    end_page = None if not args.end_page else int(args.end_page)
+    start_page, end_page = args.start_page, args.end_page
 
     book_ids = []
     book_list = []
