@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 import json
 
 
-def download_txt(url, filename, folder='books/'):
+def download_txt(url, filename, folder='books'):
     """Функция для скачивания текстовых файлов.
 
     Args:
@@ -29,7 +29,7 @@ def download_txt(url, filename, folder='books/'):
     return fpath
 
 
-def download_image(url, filename, folder='images/'):
+def download_image(url, filename, folder='images'):
     """Функция для скачивания картинок.
 
     Args:
