@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 import json
 
 
-def download_txt(url, filename, folder='books'):
+def download_txt(url, filename, text_folder):
     """Функция для скачивания текстовых файлов.
 
     Args:
@@ -21,15 +21,15 @@ def download_txt(url, filename, folder='books'):
     response.raise_for_status()
     if response.status_code in [301, 302]:
         return None
-    os.makedirs(folder, exist_ok=True)
+    os.makedirs(text_folder, exist_ok=True)
     filename = sanitize_filename(filename)
-    fpath = os.path.join(folder, filename)
+    fpath = os.path.join(text_folder, filename)
     with open(fpath, 'w') as f:
         f.write(response.text)
     return fpath
 
 
-def download_image(url, filename, folder='images'):
+def download_image(url, filename, image_folder):
     """Функция для скачивания картинок.
 
     Args:
@@ -43,26 +43,24 @@ def download_image(url, filename, folder='images'):
     response.raise_for_status()
     if response.status_code in [301, 302]:
         return None
-    os.makedirs(folder, exist_ok=True)
+    os.makedirs(image_folder, exist_ok=True)
     filename = sanitize_filename(filename)
-    fpath = os.path.join(folder, filename)
+    fpath = os.path.join(image_folder, filename)
     with open(fpath, 'wb') as f:
         f.write(response.content)
     return fpath
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--start_page", help="Первая страница для скачивания", default=1, type=int,
-    )
-    parser.add_argument(
-        "--end_page", help="Последняя страница для скачивания", default=None, type=int,
-    )
-    args = parser.parse_args()
-    start_page, end_page = args.start_page, args.end_page
+def get_book_ids(base_url, start_page, end_page):
+    """Функция собирает список id всех книг в указанных страницах.
 
-    base_url = 'http://tululu.org'
+    Args:
+        base_url (str): Cсылка на сайт.
+        start_page (int): Номер первой страницы для скачивания.
+        end_page (int): Номер последней страницы для скачивания.
+    Returns:
+        list: список id скачанных книг.
+    """
     book_ids = []
     page = start_page - 1
     while not end_page or page <= end_page:
@@ -75,7 +73,19 @@ def main():
         soup = BeautifulSoup(response.text, 'lxml')
         links_from_page = soup.select('.d_book .bookimage a')
         book_ids += [link['href'][2:-1] for link in links_from_page]
+    return book_ids
 
+def get_book_list(base_url, book_ids, image_folder, text_folder):
+    """Функция скачивает книги и изображения в указанные папки.
+
+    Args:
+        base_url (str): Cсылка на сайт.
+        book_ids (list): список id скачанных книг.
+        image_folder (str): Название папки для изображений.
+        text_folder (str): Название папки для текста книг.
+    Returns:
+        book_list: Список словарей с книгами.
+    """
     book_list = []
     for book_id in book_ids:
         book_link = f'{base_url}/b{book_id}/'
@@ -89,12 +99,14 @@ def main():
         title, author = title.strip(), author.strip()
 
         file_url = f'{base_url}/txt.php?id={book_id}'
-        book_path = download_txt(url=file_url, filename=f'{title}.txt')
+        book_path = download_txt(url=file_url, filename=f'{title}.txt', text_folder=text_folder)
 
         image_link = soup.select_one('.bookimage img')['src']
         image_full_link = urljoin(base_url, image_link)
         image_file_name = image_full_link.split('/')[-1]
-        img_src = download_image(url=image_full_link, filename=image_file_name)
+        img_src = download_image(
+            url=image_full_link, filename=image_file_name, image_folder=image_folder,
+        )
 
         comments_soup = soup.select('div.texts span.black')
         comments = [comment.text for comment in comments_soup]
@@ -110,8 +122,35 @@ def main():
             'comments': comments,
             'genres': genres,
         })
+    return book_list
 
-    with open('book_list.json', 'w') as book_file:
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--start_page", default=1, type=int,
+        help="Первая страница для скачивания", 
+    )
+    parser.add_argument(
+        "--end_page", default=None, type=int,
+        help="Последняя страница для скачивания", 
+    )
+    args = parser.parse_args()
+    book_list_filename = os.getenv("BOOK_LIST_FILENAME", "book_list.json")
+
+    base_url = 'http://tululu.org'
+    book_ids = get_book_ids(
+        base_url=base_url,
+        start_page=args.start_page,
+        end_page=args.end_page,
+    )
+    book_list = get_book_list(
+        base_url=base_url,
+        book_ids=book_ids,
+        image_folder=os.getenv('BOOK_IMAGE_FOLDERNAME', 'images'),
+        text_folder=os.getenv('BOOK_TEXT_FOLDERNAME', 'books'),
+    )
+
+    with open(book_list_filename, 'w') as book_file:
         json.dump(book_list, book_file, ensure_ascii=True)
 
 
