@@ -9,6 +9,7 @@ import json
 
 def download_txt(url, filename, folder='books/'):
     """Функция для скачивания текстовых файлов.
+
     Args:
         url (str): Cсылка на текст, который хочется скачать.
         filename (str): Имя файла, с которым сохранять.
@@ -30,6 +31,7 @@ def download_txt(url, filename, folder='books/'):
 
 def download_image(url, filename, folder='images/'):
     """Функция для скачивания картинок.
+
     Args:
         url (str): Cсылка на картинку, которую хочется скачать.
         filename (str): Имя файла, с которым сохранять.
