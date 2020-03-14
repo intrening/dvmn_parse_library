@@ -62,22 +62,23 @@ def main():
     args = parser.parse_args()
     start_page, end_page = args.start_page, args.end_page
 
+    base_url = 'http://tululu.org'
     book_ids = []
-    book_list = []
     page = start_page - 1
     while not end_page or page <= end_page:
         page += 1
-        url = f'http://tululu.org/l55/{page}/'
-        response = requests.get(url, allow_redirects=False)
+        page_url = f'{base_url}/l55/{page}/'
+        response = requests.get(page_url, allow_redirects=False)
         response.raise_for_status()
         if response.status_code in [301, 302]:
             break
         soup = BeautifulSoup(response.text, 'lxml')
-        book_links = soup.select('.d_book .bookimage a')
-        book_ids += [book_link['href'][2:-1] for book_link in book_links]
+        links_from_page = soup.select('.d_book .bookimage a')
+        book_ids += [link['href'][2:-1] for link in links_from_page]
 
+    book_list = []
     for book_id in book_ids:
-        book_link = f'http://tululu.org/b{book_id}/'
+        book_link = f'{base_url}/b{book_id}/'
         response = requests.get(book_link, allow_redirects=False)
         response.raise_for_status()
         if response.status_code in [301, 302]:
@@ -87,11 +88,11 @@ def main():
         title, author = header.split('::')
         title, author = title.strip(), author.strip()
 
-        file_url = f'http://tululu.org/txt.php?id={book_id}'
+        file_url = f'{base_url}/txt.php?id={book_id}'
         book_path = download_txt(url=file_url, filename=f'{title}.txt')
 
         image_link = soup.select_one('.bookimage img')['src']
-        image_full_link = urljoin(url, image_link)
+        image_full_link = urljoin(base_url, image_link)
         image_file_name = image_full_link.split('/')[-1]
         img_src = download_image(url=image_full_link, filename=image_file_name)
 
