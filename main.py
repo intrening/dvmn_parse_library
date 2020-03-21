@@ -102,7 +102,7 @@ def get_book_list(base_url, book_ids, image_folder, text_folder):
         book_path = download_txt(url=file_url, filename=f'{title}.txt', text_folder=text_folder)
 
         image_link = soup.select_one('.bookimage img')['src']
-        image_full_link = urljoin(base_url, image_link)
+        image_full_link = urljoin(book_link, image_link)
         image_file_name = image_full_link.split('/')[-1]
         img_src = download_image(
             url=image_full_link, filename=image_file_name, image_folder=image_folder,
