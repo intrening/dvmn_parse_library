@@ -1,6 +1,4 @@
 .vscode/
-books/
-images/
 book_list.json
 venv/
 .env
