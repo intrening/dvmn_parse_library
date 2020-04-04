@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <title>Hello, world!</title>
+</head>
+
+<body>
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+    {% if current_page == 1 %}
+        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+    {% else %}
+        <li class="page-item"><a class="page-link" href="index{{ current_page - 1 }}.html">Previous</a></li>
+    {% endif %}
+    
+    {% for num in pages %}
+      {% if num == current_page %}
+        <li class="page-item active"><a class="page-link" href="index{{ num }}.html">{{ num }}</a></li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="index{{ num }}.html">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if current_page == pages|length %}
+        <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+    {% else %}
+        <li class="page-item"><a class="page-link" href="index{{ current_page + 1 }}.html">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+  <div class="container">
+    <div class="row">
+      {% for book in books %}
+      <div class="card mb-3" style="width: 540px;">
+        <div class="row no-gutters">
+          <div class="col-md-4">
+            <img src="{{ book.img_src }}" class="card-img" alt="...">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">{{ book.title }}</h5>
+              <p class="card-text">{{ book.author }}</p>
+              <p class="card-text">
+              {% for genre in book.genres %}
+                <span class="badge badge-secondary">{{ genre}}</span>
+              {% endfor%}
+              </p>
+              <p class="card-text"><a href="{{ book.book_path }}" target="_blank">Читать</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% if loop.index is even %}
+      <div class="w-100"></div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+  </script>
+  <script src="popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+  </script>
+  <script src="bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+  </script>
+</body>
+
+</html>
