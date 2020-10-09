@@ -137,7 +137,7 @@ def main():
     args = parser.parse_args()
     book_list_filename = os.getenv("BOOK_LIST_FILENAME", "book_list.json")
 
-    base_url = 'http://tululu.org'
+    base_url = 'https://tululu.org'
     book_ids = get_book_ids(
         base_url=base_url,
         start_page=args.start_page,
