@@ -3,7 +3,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlencode, quote
 import json
 
 
@@ -117,8 +117,8 @@ def get_book_list(base_url, book_ids, image_folder, text_folder):
         book_list.append({
             'title': title,
             'author': author,
-            'img_src': img_src,
-            'book_path': book_path,
+            'img_src': urlencode(img_src),
+            'book_path': quote(book_path),
             'comments': comments,
             'genres': genres,
         })
