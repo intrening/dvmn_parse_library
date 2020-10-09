@@ -3,7 +3,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
-from urllib.parse import urljoin, urlencode, quote
+from urllib.parse import urljoin, quote
 import json
 
 
@@ -42,7 +42,7 @@ def download_image(url, filename, image_folder):
     response = requests.get(url, allow_redirects=False)
     response.raise_for_status()
     if response.status_code in [301, 302]:
-        return None
+        return ''
     os.makedirs(image_folder, exist_ok=True)
     filename = sanitize_filename(filename)
     fpath = os.path.join(image_folder, filename)
@@ -114,14 +114,15 @@ def get_book_list(base_url, book_ids, image_folder, text_folder):
         genres_soup = soup.select('span.d_book a')
         genres = [genre.text for genre in genres_soup]
 
-        book_list.append({
-            'title': title,
-            'author': author,
-            'img_src': urlencode(img_src),
-            'book_path': quote(book_path),
-            'comments': comments,
-            'genres': genres,
-        })
+        if book_path:
+            book_list.append({
+                'title': title,
+                'author': author,
+                'img_src': quote(img_src),
+                'book_path': quote(book_path),
+                'comments': comments,
+                'genres': genres,
+            })
     return book_list
 
 def main():
