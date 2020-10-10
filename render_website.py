@@ -4,8 +4,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server, shell
 
 
-def on_reload():
-    BOOKS_ON_PAGE = 10
+def on_reload(books_on_page=10):
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
@@ -17,7 +16,7 @@ def on_reload():
         books_json = f.read()
     books = json.loads(books_json)
     
-    books_chunks = [books[x:x+BOOKS_ON_PAGE] for x in range(0, len(books), BOOKS_ON_PAGE)]
+    books_chunks = [books[x:x+books_on_page] for x in range(0, len(books), books_on_page)]
     pages_len = len(books_chunks)
 
     for num, books in enumerate(books_chunks, start=1):
