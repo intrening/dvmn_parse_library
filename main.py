@@ -75,6 +75,7 @@ def get_book_ids(base_url, start_page, end_page):
         book_ids += [link['href'][2:-1] for link in links_from_page]
     return book_ids
 
+
 def get_book_list(base_url, book_ids, image_folder, text_folder):
     """Функция скачивает книги и изображения в указанные папки.
 
@@ -99,13 +100,16 @@ def get_book_list(base_url, book_ids, image_folder, text_folder):
         title, author = title.strip(), author.strip()
 
         file_url = f'{base_url}/txt.php?id={book_id}'
-        book_path = download_txt(url=file_url, filename=f'{title}.txt', text_folder=text_folder)
+        book_path = download_txt(
+            url=file_url, filename=f'{title}.txt', text_folder=text_folder,
+        )
 
         image_link = soup.select_one('.bookimage img')['src']
         image_full_link = urljoin(book_link, image_link)
         image_file_name = image_full_link.split('/')[-1]
         img_src = download_image(
-            url=image_full_link, filename=image_file_name, image_folder=image_folder,
+            url=image_full_link, filename=image_file_name,
+            image_folder=image_folder,
         )
 
         comments_soup = soup.select('div.texts span.black')
@@ -125,15 +129,16 @@ def get_book_list(base_url, book_ids, image_folder, text_folder):
             })
     return book_list
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--start_page", default=1, type=int,
-        help="Первая страница для скачивания", 
+        help="Первая страница для скачивания",
     )
     parser.add_argument(
         "--end_page", default=None, type=int,
-        help="Последняя страница для скачивания", 
+        help="Последняя страница для скачивания",
     )
     args = parser.parse_args()
     book_list_filename = os.getenv("BOOK_LIST_FILENAME", "book_list.json")
