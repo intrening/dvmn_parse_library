@@ -1,8 +1,10 @@
+import os
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server, shell
 
+BOOK_LIST_FILENAME = os.getenv("BOOK_LIST_FILENAME", "book_list.json")
 
 def on_reload(books_on_page=10):
     env = Environment(
@@ -12,7 +14,7 @@ def on_reload(books_on_page=10):
 
     template = env.get_template('template.html')
 
-    with open ('book_list.json', 'r') as f:
+    with open (BOOK_LIST_FILENAME, 'r') as f:
         books_json = f.read()
     books = json.loads(books_json)
     
