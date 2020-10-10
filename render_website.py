@@ -30,7 +30,11 @@ def on_reload():
         with open(filename, 'w', encoding="utf8") as file:
             file.write(rendered_page)
 
-on_reload()
-server = Server()
-server.watch('template.html', on_reload)
-server.serve(root='.')
+def main():
+    on_reload()
+    server = Server()
+    server.watch('template.html', on_reload)
+    server.serve(root='.')
+
+if __name__ == '__main__':
+    main()
