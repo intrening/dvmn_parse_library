@@ -1,7 +1,7 @@
 requests==2.23.0
 beautifulsoup4==4.8.2
 pathvalidate==2.2.0
-lxml==4.5.0
+lxml==4.6.2
 Jinja2==2.11.2
 livereload==2.6.3
 more-itertools==8.5.0
